@@ -2,6 +2,7 @@
 const nodegit = require("nodegit");
 const path = require("path");
 
+
 /////////////////////////////////////////////
 ///// Parâmetros de execução ////////////////
 const REPO_DIR = process.argv.length > 1 ? '../' + process.argv[2] : false
@@ -20,27 +21,33 @@ nodegit.Repository.open(path.resolve(__dirname, REPO_DIR))
   .then(function(repo) {
     repository = repo;
 
+    console.log('REPO_DIR: ' + REPO_DIR, 'username: ' + process.env.USERNAME)
+
     // Loop de verificação
     setInterval( () => {
-        repository.fetchAll({
-            callbacks: {
-                credentials: function(url, userName) {
-                return nodegit.Cred.sshKeyFromAgent(userName);
-                },
-                certificateCheck: function() {
-                return 0;
+        try {
+            repository.fetchAll({
+                callbacks: {
+                    credentials: function(url, userName) {
+                    return nodegit.Cred.sshKeyFromAgent(userName);
+                    },
+                    certificateCheck: function() {
+                    return 0;
+                    }
                 }
-            }
-        })
-        // Now that we're finished fetching, go ahead and merge our local branch
-        // with the new one
-        .then(function() {
-            return repository.getCurrentBranch()
-            .then(function(branch) {
-                return repository.mergeBranches(branch.shorthand(), "origin/" + branch.shorthand());
-            });
-        })
-    }, 10000)
+            })
+            // Now that we're finished fetching, go ahead and merge our local branch
+            // with the new one
+            .then(function() {
+                return repository.getCurrentBranch()
+                .then(function(branch) {
+                    return repository.mergeBranches(branch.shorthand(), "origin/" + branch.shorthand());
+                });
+            })
+        } catch (error) {
+            console.error('REPO_DIR: ' + REPO_DIR, 'username: ', error)
+        }
+    }, 30000)
   })
 }
 
