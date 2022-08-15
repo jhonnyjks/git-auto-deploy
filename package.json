@@ -1,5 +1,5 @@
 {
-  "name": "test-autodeploy/",
+  "name": "node-git-autodeploy",
   "version": "1.0.0",
   "private": true,
   "description": "",
