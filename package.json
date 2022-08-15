@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/jhonnyjks/test-autodeploy/#readme",
   "dependencies": {
-    "nodegit": "^0.27.0",
+    "simple-git": "^3.12.0",
     "username": "^6.0.0"
   }
 }
