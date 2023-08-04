@@ -10,7 +10,8 @@ const fs = require('fs')
 const REPO_DIR = process.argv.length > 1 ? '../' + process.argv[2] : false
 const DEPLOY_TYPE = process.argv.length > 2 ? process.argv[3] : false
 
-let repository;
+let reactDir = ''
+let redeploy = false
 
 const seed = () => {
     // Finaliza se REPO_DIR for inválido
@@ -37,27 +38,39 @@ const seed = () => {
             git.pull().then((result, opt) => {
                 // console.log('//----', new Date(), '\n', result.toString())
 
-                if (result && result.files && result.files.length > 0) {
-
-                    if (DEPLOY_TYPE == 'react') {
-                        console.log('--// AUTO DEPLOY REACT')
-
-                        clearInterval(intervalId)
-
-                        let actualDir = ''
+                switch(DEPLOY_TYPE) {
+                    case 'react':
                         const baseDirArray = options.baseDir.split('/')
+                        // console.log('baseDirArray', baseDirArray)
 
                         for (let i = baseDirArray.length - 1; i >= 0; i--) {
-                            baseDirArray.pop()
-                            actualDir = baseDirArray.join('/')
+                            reactDir = baseDirArray.join('/')
+                            //console.log('reactDir', reactDir)
 
-                            if (fs.existsSync(actualDir + '/package.json')) {
-                                console.log('Deploy in dir: ', actualDir);
+                            if (fs.existsSync(reactDir + '/package.json')) {
+
+                                if (!fs.existsSync(reactDir + '/build/index.html')) {
+                                    console.log('redeploy ' + DEPLOY_TYPE + ' on dir ' + reactDir)
+                                    redeploy = true
+                                }
                                 break;
+                            } else {
+                                baseDirArray.pop()
                             }
                         }
 
-                        exec('npm --prefix ' + actualDir + ' run build', (err2, output2) => {
+
+                }
+
+                if ((result && result.files && result.files.length > 0) || redeploy ) {
+
+                    if (DEPLOY_TYPE == 'react') {
+                        console.log('Deploy ' + DEPLOY_TYPE + ' in dir: ', reactDir)
+
+                        //Matando a execução periódica para entrar no deploy
+                        clearInterval(intervalId)
+                        
+                        exec('npm --prefix ' + reactDir + ' run build', (err2, output2) => {
                             // once the command has completed, the callback function is called
                             if (err2) {
                                 // log and return if we encounter an error
@@ -66,7 +79,7 @@ const seed = () => {
                                 return
                             }
                             // log the output received from the command
-                            console.log("Autodeploy result: \n", output2)
+                            console.log((redeploy ? '[REDEPLOY] ' : '') + "Autodeploy result: \n", output2)
                             seed()
                         })
                     }
