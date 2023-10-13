@@ -32,64 +32,69 @@ const seed = () => {
 
     console.log('REPO_DIR: ' + REPO_DIR, 'username: ' + process.env.USERNAME)
 
-    // Loop de verificação
-    intervalId = setInterval(() => {
-        try {
-            git.pull().then((result, opt) => {
-                // console.log('//----', new Date(), '\n', result.toString())
+    try {
+        git.pull().then((result, opt) => {
+            // console.log('//----', new Date(), '\n', result.toString())
 
-                switch(DEPLOY_TYPE) {
-                    case 'react':
-                        const baseDirArray = options.baseDir.split('/')
-                        // console.log('baseDirArray', baseDirArray)
+            switch(DEPLOY_TYPE) {
+                case 'react':
+                    const baseDirArray = options.baseDir.split('/')
+                    // console.log('baseDirArray', baseDirArray)
 
-                        for (let i = baseDirArray.length - 1; i >= 0; i--) {
-                            reactDir = baseDirArray.join('/')
-                            //console.log('reactDir', reactDir)
+                    for (let i = baseDirArray.length - 1; i >= 0; i--) {
+                        reactDir = baseDirArray.join('/')
+                        //console.log('reactDir', reactDir)
 
-                            if (fs.existsSync(reactDir + '/package.json')) {
+                        if (fs.existsSync(reactDir + '/package.json')) {
 
-                                if (!fs.existsSync(reactDir + '/build/index.html')) {
-                                    console.log('redeploy ' + DEPLOY_TYPE + ' on dir ' + reactDir)
-                                    redeploy = true
-                                }
-                                break;
-                            } else {
-                                baseDirArray.pop()
+                            if (!fs.existsSync(reactDir + '/build/index.html')) {
+                                console.log('redeploy ' + DEPLOY_TYPE + ' on dir ' + reactDir)
+                                redeploy = true
                             }
+                            break;
+                        } else {
+                            baseDirArray.pop()
                         }
-
-
-                }
-
-                if ((result && result.files && result.files.length > 0) || redeploy ) {
-
-                    if (DEPLOY_TYPE == 'react') {
-                        console.log('Deploy ' + DEPLOY_TYPE + ' in dir: ', reactDir)
-
-                        //Matando a execução periódica para entrar no deploy
-                        clearInterval(intervalId)
-                        
-                        exec('npm --prefix ' + reactDir + ' run build', (err2, output2) => {
-                            // once the command has completed, the callback function is called
-                            if (err2) {
-                                // log and return if we encounter an error
-                                console.error("Erro ao executar comando 'run build': ", err2)
-                                seed()
-                                return
-                            }
-                            // log the output received from the command
-                            console.log((redeploy ? '[REDEPLOY] ' : '') + "Autodeploy result: \n", output2)
-                            seed()
-                        })
                     }
+
+
+            }
+
+            if ((result && result.files && result.files.length > 0) || redeploy ) {
+
+                if (DEPLOY_TYPE == 'react') {
+                    console.log('Deploy ' + DEPLOY_TYPE + ' in dir: ', reactDir)
+
+                    redeploy = false
+                    
+                    return exec('npm --prefix ' + reactDir + ' run build', (err2, output2) => {
+                        // once the command has completed, the callback function is called
+                        if (err2) {
+                            // log and return if we encounter an error
+                            console.error("Erro ao executar comando 'run build': ", err2)
+                            startSeed()
+                            return
+                        }
+                        // log the output received from the command
+                        console.log((redeploy ? '[REDEPLOY] ' : '') + "Autodeploy result: \n", output2)
+                        startSeed()
+                    })
+
                 }
-            });
-        } catch (error) {
-            console.error('REPO_DIR: ' + REPO_DIR, 'username: ', error)
-        }
-    }, 10000)
+            }
+
+            // Fim do script, reinicia...
+            startSeed()
+        })
+    } catch (error) {
+        console.error('REPO_DIR: ' + REPO_DIR, 'username: ', error)
+        startSeed()
+        return
+    }
 
 }
 
-seed()
+// Start with delay
+const startSeed = (timeout = 10000) => setTimeout(() => seed(), timeout)
+
+startSeed()
