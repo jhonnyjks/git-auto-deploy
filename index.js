@@ -1,4 +1,4 @@
-// pm2 start index.js --name NodeAutoDeploy --time --watch --node-args="--max-old-space-size=4096" -- repo_relative_path APPS[appIndex].type
+// pm2 start index.js --name NodeAutoDeploy --time --watch --node-args="--max-old-space-size=4096"
 const { simpleGit, SimpleGit, SimpleGitOptions } = require('simple-git');
 const path = require("path");
 const { exec } = require('child_process')
@@ -9,9 +9,17 @@ const fs = require('fs')
 ///// Parâmetros de execução ////////////////
 const APPS = [
     {
-        type: '', // react, laravel
-        repoDir: '', // Caminho relativo desse arquivo index.js até o repositório
-        // deployDir: '' // Opcional. Caminho relativo do diretório de deploy. Utilizar apenas quando for diferente de repoDir.
+        type: 'react',
+        repoDir: '../client',
+    },
+    {
+        type: 'react',
+        repoDir: '../client/src/app',
+        deployDir: '../client'
+    },
+    {
+        type: 'laravel',
+        repoDir: '../api'
     }
 ]
 
@@ -38,9 +46,9 @@ const seed = (appIndex) => {
 
                 switch(APPS[appIndex].type) {
                     case 'react':
-                        console.log('['+appIndex+'] Deploy ' + APPS[appIndex].type + ' in dir: ' + deployDir)
+                        console.log('['+appIndex+'] Deploy ' + APPS[appIndex].type + ' in dir: ' + APPS[appIndex].deployDir)
 
-                        return exec('npm --prefix ' + deployDir + ' run build', (err2, output2) => {
+                        return exec('npm --prefix ' + APPS[appIndex].deployDir + ' run build', (err2, output2) => {
                             // once the command has completed, the callback function is called
                             if (err2) {
                                 // log and return if we encounter an error
