@@ -1,4 +1,4 @@
-// pm2 start index.js --name NodeAutoDeploy --time --watch --node-args="--max-old-space-size=4096"
+// pm2 start index.js --name AutoDeployAll --time --watch --node-args="--max-old-space-size=4096"
 const { simpleGit, SimpleGit, SimpleGitOptions } = require('simple-git');
 const path = require("path");
 const { exec } = require('child_process')
