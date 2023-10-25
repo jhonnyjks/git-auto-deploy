@@ -45,10 +45,39 @@ const seed = (appIndex) => {
             if ((result && result.files && result.files.length > 0) ) {
 
                 switch(APPS[appIndex].type) {
+                    // Deploy ReactJS
                     case 'react':
-                        console.log('['+appIndex+'] Deploy ' + APPS[appIndex].type + ' in dir: ' + APPS[appIndex].deployDir)
+                        console.log('['+appIndex+'] Deploy ' + APPS[appIndex].type + ' in dir: ' + deployDir)
 
-                        return exec('npm --prefix ' + APPS[appIndex].deployDir + ' run build', (err2, output2) => {
+                        // Reinstall
+                        return exec('npm --prefix ' + deployDir + ' install', (err2, output2) => {
+                            // once the command has completed, the callback function is called
+                            if (err2) {
+                                // log and return if we encounter an error
+                                console.error("Erro ao executar comando 'install': ", err2)
+                                startSeed(appIndex+1)
+                                return
+                            }
+
+                            // Rebuild
+                            return exec('npm --prefix ' + deployDir + ' run build', (err2, output2) => {
+                                // once the command has completed, the callback function is called
+                                if (err2) {
+                                    // log and return if we encounter an error
+                                    console.error("Erro ao executar comando 'run build': ", err2)
+                                    startSeed(appIndex+1)
+                                    return
+                                }
+    
+                                startSeed(appIndex+1)
+                            })
+                        })
+                    
+                    // TODO: Deploy Laravel reinstall & migration
+                    /* case 'laravel':
+                        console.log('['+appIndex+'] Deploy ' + APPS[appIndex].type + ' in dir: ' + deployDir)
+
+                        return exec('npm --prefix ' + deployDir + ' run build', (err2, output2) => {
                             // once the command has completed, the callback function is called
                             if (err2) {
                                 // log and return if we encounter an error
@@ -58,7 +87,7 @@ const seed = (appIndex) => {
                             }
 
                             startSeed(appIndex+1)
-                        })
+                        }) */
                 }
             }
 
