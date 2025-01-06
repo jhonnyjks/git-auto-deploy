@@ -50,7 +50,7 @@ const seed = (appIndex) => {
                         console.log('['+appIndex+'] Deploy ' + APPS[appIndex].type + ' in dir: ' + deployDir)
 
                         // Reinstall
-                        return exec('npm --prefix ' + deployDir + ' install', (err2, output2) => {
+                        return exec('npm --legacy-peer-deps --prefix ' + deployDir + ' install', (err2, output2) => {
                             // once the command has completed, the callback function is called
                             if (err2) {
                                 // log and return if we encounter an error
@@ -60,7 +60,7 @@ const seed = (appIndex) => {
                             }
 
                             // Rebuild
-                            return exec('npm --prefix ' + deployDir + ' run build', (err2, output2) => {
+                            return exec('npm --legacy-peer-deps --prefix ' + deployDir + ' run build', (err2, output2) => {
                                 // once the command has completed, the callback function is called
                                 if (err2) {
                                     // log and return if we encounter an error
@@ -77,7 +77,7 @@ const seed = (appIndex) => {
                     /* case 'laravel':
                         console.log('['+appIndex+'] Deploy ' + APPS[appIndex].type + ' in dir: ' + deployDir)
 
-                        return exec('npm --prefix ' + deployDir + ' run build', (err2, output2) => {
+                        return exec('npm --legacy-peer-deps --prefix ' + deployDir + ' run build', (err2, output2) => {
                             // once the command has completed, the callback function is called
                             if (err2) {
                                 // log and return if we encounter an error
